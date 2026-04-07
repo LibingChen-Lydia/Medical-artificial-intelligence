@@ -1,0 +1,41 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage[utf8]{inputenc}
+
+\title{Predicting Mortality in Heart Failure Patients Using Clinical Variables: A Machine Learning Benchmark Study}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Heart failure is associated with substantial mortality, yet prognosis remains heterogeneous across patients. This study analyzed the Heart Failure Clinical Records dataset for the binary endpoint \texttt{DEATH\_EVENT} using a combined framework of descriptive analysis, univariate testing, correlation analysis, feature importance ranking, and predictive modeling. Across the multi-angle factor analysis, follow-up time, ejection fraction, and serum creatinine emerged as the most prominent variables, although follow-up time was interpreted cautiously because of its connection to outcome ascertainment. In the primary model benchmark, XGBoost achieved the highest accuracy (0.8333), precision (0.8462), and F1-score (0.6875), whereas random forest achieved the highest AUC (0.8960). In the preprocessing sensitivity analysis, random forest and XGBoost remained relatively stable across raw, winsorized, and scaled data variants. These results suggest that ensemble methods offer robust discrimination in this small tabular dataset, while complementary factor analysis helps identify clinically interpretable prognostic signals.
+\end{abstract}
+
+\section{Introduction}
+\input{sections/introduction}
+
+\section{Data Characterization}
+\input{sections/data characterization}
+
+\section{Methods}
+\input{sections/methods}
+
+\section{Results}
+\input{sections/results}
+
+\section{Discussion}
+\input{sections/discussion}
+
+\bibliographystyle{plain}
+\bibliography{ref}
+
+\end{document}

@@ -1,0 +1,66 @@
+\subsection{Dataset and Variables}
+The analysis was conducted on the Heart Failure Clinical Records dataset, which contains 299 patient records and 13 variables. The study endpoint was the binary outcome \texttt{DEATH\_EVENT}, comprising 203 survivors (67.89\%) and 96 deaths (32.11\%). The available predictors represent routinely collected demographic, comorbidity, laboratory, and follow-up-related information. Continuous variables were age, creatinine phosphokinase, ejection fraction, platelets, serum creatinine, serum sodium, and follow-up time. Binary variables were anaemia, diabetes, high blood pressure, sex, and smoking.
+
+
+\subsection{Preprocessing and Outlier Handling}
+Initial data inspection showed no missing values. Because several laboratory and physiological measurements spanned wide value ranges, outliers were examined using an interquartile range criterion. Notable extreme values were identified in creatinine phosphokinase, serum creatinine, platelets, serum sodium, and ejection fraction. These observations were retained in the primary analysis because they may represent clinically meaningful severity rather than simple measurement error.
+
+To evaluate whether extreme values materially influenced model behavior, a winsorized version of the dataset was created only for sensitivity analysis. Winsorization was therefore used as a robustness check rather than as the default preprocessing strategy. In addition, continuous variables were standardized for scale-sensitive models. This design separated the main analytical pipeline from robustness comparison and reduced ambiguity in later model interpretation.
+
+\subsection{Descriptive Statistical Analysis}
+Descriptive statistics were summarized separately for continuous and categorical variables to characterize the study cohort. The cohort characteristics are reported in Table~\ref{tab:continuous_stats} and Table~\ref{tab:categorical_stats}. Among 299 patients, 203 (67.89\%) survived and 96 (32.11\%) died during follow-up. Age was 60.83 (11.89) years and ejection fraction was 38.08\% (11.83). Follow-up time was 130.26 (77.61) days, with a median of 115 days (interquartile range [IQR], 73--203).
+
+Several continuous variables showed substantial dispersion. Creatinine phosphokinase had a median of 250.0 (IQR, 116.5--582.0) and ranged from 23 to 7861, indicating marked right skew. Platelet count was 263{,}358.03 (97{,}804.24), with a range of 25{,}100 to 850{,}000. Serum creatinine was 1.39 (1.03) mg/dL, with a median of 1.1 mg/dL (IQR, 0.9--1.4) and a maximum of 9.4 mg/dL. Serum sodium was 136.63 (4.41) mEq/L, with a median of 137 mEq/L (IQR, 134--140).
+
+For categorical variables, anaemia was present in 129 patients (43.14\%), diabetes in 125 (41.81\%), and high blood pressure in 105 (35.12\%). Men accounted for 194 patients (64.88\%), and 96 patients (32.11\%) were smokers. Overall, the cohort showed substantial variation in demographic characteristics, comorbidity burden, and laboratory measures, supporting subsequent predictive and risk factor analyses.
+
+
+
+\begin{table}[H]
+\centering
+\caption{Descriptive statistics of continuous variables.}
+\label{tab:continuous_stats}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lrrrrrrr}
+\toprule
+Variable & Mean & Std & Min & Q1 & Median & Q3 & Max \\
+\midrule
+Age & 60.83 & 11.89 & 40 & 51 & 60 & 70 & 95 \\
+CPK & 581.84 & 970.29 & 23 & 116.5 & 250 & 582 & 7861 \\
+Ejection fraction & 38.08 & 11.83 & 14 & 30 & 38 & 45 & 80 \\
+Platelets & 263358.03 & 97804.24 & 25100 & 212500 & 262000 & 303500 & 850000 \\
+Serum creatinine & 1.39 & 1.03 & 0.5 & 0.9 & 1.1 & 1.4 & 9.4 \\
+Serum sodium & 136.63 & 4.41 & 113 & 134 & 137 & 140 & 148 \\
+Time & 130.26 & 77.61 & 4 & 73 & 115 & 203 & 285 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Distribution of categorical variables.}
+\label{tab:categorical_stats}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccc}
+\toprule
+Variable & Category & Count & Percentage (\%) \\
+\midrule
+anaemia & 0 & 170 & 56.86 \\
+anaemia & 1 & 129 & 43.14 \\
+diabetes & 0 & 174 & 58.19 \\
+diabetes & 1 & 125 & 41.81 \\
+high\_blood\_pressure & 0 & 194 & 64.88 \\
+high\_blood\_pressure & 1 & 105 & 35.12 \\
+sex & 0 & 105 & 35.12 \\
+sex & 1 & 194 & 64.88 \\
+smoking & 0 & 203 & 67.89 \\
+smoking & 1 & 96 & 32.11 \\
+DEATH\_EVENT & 0 & 203 & 67.89 \\
+DEATH\_EVENT & 1 & 96 & 32.11 \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+
+
+

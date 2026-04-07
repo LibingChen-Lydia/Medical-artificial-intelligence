@@ -1,0 +1,6 @@
+﻿variable,chi2_statistic,p_value
+high_blood_pressure,1.5435,0.21410341199416905
+anaemia,1.0422,0.3073160508415107
+smoking,0.0073,0.9317652998235507
+diabetes,0.0,1.0
+sex,0.0,1.0
