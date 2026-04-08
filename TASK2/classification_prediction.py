@@ -18,6 +18,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -30,6 +31,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from joblib import dump
 
 # xgboost
 from xgboost import XGBClassifier
@@ -41,6 +43,41 @@ from torch.utils.data import TensorDataset, DataLoader
 
 RESULT_DIR = "results"
 FIG_DIR = "figures"
+ARTIFACT_DIR = "artifacts"
+BEST_MODEL_ARTIFACT_PATH = os.path.join(ARTIFACT_DIR, "best_mortality_predictor.joblib")
+
+FEATURE_COLUMNS = [
+    "age",
+    "anaemia",
+    "creatinine_phosphokinase",
+    "diabetes",
+    "ejection_fraction",
+    "high_blood_pressure",
+    "platelets",
+    "serum_creatinine",
+    "serum_sodium",
+    "sex",
+    "smoking",
+    "time",
+]
+
+CONTINUOUS_FEATURE_COLUMNS = [
+    "age",
+    "creatinine_phosphokinase",
+    "ejection_fraction",
+    "platelets",
+    "serum_creatinine",
+    "serum_sodium",
+    "time",
+]
+
+BINARY_FEATURE_COLUMNS = [
+    "anaemia",
+    "diabetes",
+    "high_blood_pressure",
+    "sex",
+    "smoking",
+]
 
 def set_plot_style():
     from matplotlib import font_manager
@@ -123,6 +160,45 @@ def load_dataset(file_path: str, target_col: str = TARGET_COL) -> Tuple[pd.DataF
     y = df[target_col].copy()
 
     return X, y
+
+
+def build_and_save_best_model_artifact(best_model_name: str,
+                                       reference_auc: float,
+                                       save_path: str = BEST_MODEL_ARTIFACT_PATH) -> str:
+    """
+    根据 Experiment 1 排名第一的模型名称，使用全部 scaled 数据重新训练，
+    并同时保存用于新患者推理的标准化器与元数据。
+    """
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    raw_df = pd.read_csv(RAW_PATH)
+    scaled_df = pd.read_csv(SCALED_PATH)
+
+    scaler = StandardScaler()
+    scaler.fit(raw_df[CONTINUOUS_FEATURE_COLUMNS])
+
+    X_full = scaled_df[FEATURE_COLUMNS].copy()
+    y_full = scaled_df[TARGET_COL].copy()
+
+    all_models = get_experiment1_models(input_dim=X_full.shape[1])
+    if best_model_name not in all_models:
+        raise ValueError(f"无法为未知模型生成工件：{best_model_name}")
+
+    best_model = all_models[best_model_name]
+    best_model.fit(X_full, y_full)
+
+    artifact = {
+        "model_name": best_model_name,
+        "reference_auc": float(reference_auc),
+        "feature_columns": FEATURE_COLUMNS,
+        "continuous_feature_columns": CONTINUOUS_FEATURE_COLUMNS,
+        "binary_feature_columns": BINARY_FEATURE_COLUMNS,
+        "scaler": scaler,
+        "model": best_model,
+    }
+    dump(artifact, save_path)
+    print(f"最佳模型预测器已保存至：{save_path}")
+    return save_path
 
 
 def get_split_indices(y: pd.Series,
@@ -572,6 +648,7 @@ def main():
 
     os.makedirs(RESULT_DIR, exist_ok=True)
     os.makedirs(FIG_DIR, exist_ok=True)
+    os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
     X_scaled, y_scaled = load_dataset(SCALED_PATH, TARGET_COL)
     train_idx, test_idx = get_split_indices(
@@ -599,6 +676,12 @@ def main():
         encoding="utf-8-sig"
     )
 
+    best_result = exp1_df.iloc[0]
+    build_and_save_best_model_artifact(
+        best_model_name=best_result["Model"],
+        reference_auc=best_result["AUC"]
+    )
+
     print("\n" + "=" * 70)
     print("全部实验完成。")
     print("结果文件已保存：")
@@ -606,6 +689,7 @@ def main():
     print("2. experiment2_data_sensitivity.csv")
     print("3. figures/experiment1_roc.png")
     print("4. figures/experiment2_auc_bar.png")
+    print(f"5. {BEST_MODEL_ARTIFACT_PATH}")
     print("=" * 70)
 
 

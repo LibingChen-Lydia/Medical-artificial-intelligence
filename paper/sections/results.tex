@@ -1,12 +1,3 @@
-\subsection{Experimental Setup and Evaluation Metrics}
-Two experiments were conducted. Experiment 1 was designed as the primary model benchmark and compared LR, SVM, KNN, RF, XGBoost, and MLP on scaled data \cite{james2021islr,cortes1995svm,cover1967knn,breiman2001rf,chen2016xgboost,hastie2009esl}.. This setting provided a consistent comparison across model classes while ensuring that scale-sensitive methods were not disadvantaged by variable magnitude differences. Experiment 2 was designed as a preprocessing sensitivity analysis. In this experiment, the tree-based models RF and XGBoost were evaluated across raw, winsorized, and scaled versions of the dataset to assess the extent to which predictive performance changed under alternative data preparation strategies. Because winsorization was introduced only for robustness comparison, the scaled benchmark remained the main reference setting for interpretation.
-
-Model performance was evaluated using accuracy, precision, recall, F1-score, and the area under the receiver operating characteristic curve (AUC). The F1-score is defined as:
-\begin{equation}
-F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}.
-\end{equation}
-
-
 \subsection{Risk Factor Detection Findings}
 The multi-angle risk factor analysis identified several variables with consistent relevance to \texttt{DEATH\_EVENT}. The correlation heatmap in Figure~\ref{fig:corr_heatmap} provides an overview of pairwise associations among numeric variables and illustrates that the dataset contains several non-negligible inter-variable relationships rather than a set of fully independent predictors. In particular, ejection fraction and serum creatinine showed meaningful relationships with the outcome-related structure of the dataset, supporting their relevance for subsequent interpretation. At the same time, the heatmap suggests that most predictors are not so strongly correlated as to make their contributions completely redundant, which supports the use of complementary statistical and model-based approaches for factor detection.
 
@@ -56,3 +47,22 @@ The secondary experiment examined whether the performance of random forest and X
 
 XGBoost showed similarly stable behavior across preprocessing variants. Accuracy, precision, recall, and F1-score remained unchanged at 0.8333, 0.8462, 0.5789, and 0.6875, respectively, for raw, winsorized, and scaled data. The AUC values were 0.8472 on raw data, 0.8562 on winsorized data, and 0.8472 on scaled data. As shown in Figure~\ref{fig:experiment2_auc}, the overall ranking of preprocessing strategies was similar across the two models, with no large shifts in discriminative performance.
 
+\subsection{Individual Mortality Probability Prediction for a New Patient}
+To further illustrate patient-level inference, an example prediction was generated for a new patient using the model with the strongest discriminative performance in the benchmark analysis. For this case, the predicted mortality probability was 0.5567, with a corresponding positive class prediction under the default decision threshold. Although presented here as an application example rather than a separate validation experiment, this result demonstrates that the proposed framework can provide individualized probability estimates in addition to cohort-level comparative performance.
+
+\begin{table}[H]
+\centering
+\caption{Example of individual mortality probability prediction for a new patient.}
+\label{tab:new_patient_prediction}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{ccccccc}
+\toprule
+Age & Ejection Fraction & Serum Creatinine & Serum Sodium & Follow-up Time & Predicted Probability & Predicted Class \\
+\midrule
+68 & 25 & 1.8 & 132 & 90 & 0.5567 & 1 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+In this example, the patient exhibited reduced ejection fraction and elevated serum creatinine, both of which had previously emerged as prominent prognostic variables in the multi-angle factor analysis. The predicted probability is therefore consistent with the broader analytical findings and illustrates how the framework may be used to summarize individualized mortality risk in probabilistic terms.

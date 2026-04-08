@@ -30,10 +30,26 @@ Feature importance was estimated using a random forest classifier trained on the
 where a smaller score indicates greater overall prominence. For variables without a valid univariate test ranking, a penalty rank was assigned to avoid overstating their importance. This strategy allowed the study to identify factors that were supported across complementary analytical perspectives rather than by a single criterion alone. Because the \texttt{time} variable reflects follow-up duration and event ascertainment structure, its strong association with mortality was interpreted cautiously and distinguished from baseline biological risk factors.
 
 \subsection{Predictive Modeling Method}
-Mortality prediction was evaluated using four supervised learning models: logistic regression (LR), random forest (RF), extreme gradient boosting (XGBoost), and multilayer perceptron (MLP). Logistic regression was included as a conventional and interpretable baseline for binary classification. For patient feature vector $\mathbf{x}$, logistic regression estimates the probability of death as
+Mortality prediction was evaluated using six supervised learning models: logistic regression (LR), support vector machine (SVM), k-nearest neighbors (KNN), random forest (RF), extreme gradient boosting (XGBoost), and multilayer perceptron (MLP). Two experiments were conducted. Experiment 1 served as the primary model benchmark and compared all six models on the scaled dataset. This setting was chosen to provide a consistent comparison across model classes while avoiding an unfair disadvantage for scale-sensitive methods. Experiment 2 was a preprocessing sensitivity analysis in which the tree-based models RF and XGBoost were evaluated on raw, winsorized, and scaled versions of the dataset. Because winsorization was introduced only for robustness comparison, the scaled benchmark remained the main reference setting for interpretation.
+
+Logistic regression was included as a conventional and interpretable baseline for binary classification. For patient feature vector $\mathbf{x}$, logistic regression estimates the probability of death as
 \begin{equation}
 P(y=1 \mid \mathbf{x}) = \sigma(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x}) = \frac{1}{1 + e^{-(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x})}}.
 \end{equation}
+
+The SVM model was included as a margin-based classifier capable of learning nonlinear decision boundaries through kernel mapping. KNN was included as a distance-based nonparametric baseline in which a patient's class is determined from the labels of nearby samples in feature space. Both methods are sensitive to feature scale, and therefore they were evaluated only in the scaled-data benchmark.
+
+For SVM, the decision function can be written as
+\begin{equation}
+f(\mathbf{x}) = \operatorname{sign}\left(\sum_{i=1}^{n}\alpha_i y_i K(\mathbf{x}_i,\mathbf{x}) + b\right),
+\end{equation}
+where $\alpha_i$ are learned coefficients, $y_i$ are class labels, $K(\mathbf{x}_i,\mathbf{x})$ is the kernel function, and $b$ is the bias term. This formulation allows the classifier to separate classes by maximizing the margin in a transformed feature space.
+
+For KNN, the predicted class for a sample $\mathbf{x}$ is determined by majority vote among its $k$ nearest neighbors:
+\begin{equation}
+\hat{y}(\mathbf{x}) = \operatorname{mode}\{y_i : \mathbf{x}_i \in \mathcal{N}_k(\mathbf{x})\},
+\end{equation}
+where $\mathcal{N}_k(\mathbf{x})$ denotes the set of the $k$ closest training samples to $\mathbf{x}$ under the chosen distance metric. This method provides a simple reference model based on local similarity structure in the feature space.
 
 Random forest was used as a tree-based ensemble method that aggregates predictions from multiple decision trees and is well suited to tabular clinical data with nonlinear relationships. The final prediction probability can be expressed as the average output across $B$ trees:
 \begin{equation}
@@ -52,3 +68,8 @@ The MLP model was used as a simple neural-network baseline. For one hidden layer
 \hat{y} = \sigma\left(\mathbf{W}_2 \, g(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2\right),
 \end{equation}
 where $\mathbf{W}_1$ and $\mathbf{W}_2$ are weight matrices, $\mathbf{b}_1$ and $\mathbf{b}_2$ are bias terms, $g(\cdot)$ is the hidden-layer activation function, and $\sigma(\cdot)$ is the output sigmoid function. The MLP was included to assess whether a modest neural architecture provided any advantage over classical machine learning models in this small-sample setting.
+
+Model performance was evaluated using accuracy, precision, recall, F1-score, and the area under the receiver operating characteristic curve (AUC). The F1-score is defined as
+\begin{equation}
+F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}.
+\end{equation}
